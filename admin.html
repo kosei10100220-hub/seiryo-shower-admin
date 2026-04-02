@@ -1,0 +1,1009 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>管理者画面｜清稜クリニック シャワー予約</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500&family=Noto+Serif+JP:wght@400;500&family=Cormorant+Garamond:ital@1&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   DESIGN TOKENS
+============================================================ */
+:root {
+  --cream:       #faf6f1;
+  --sage:        #8aab8a;
+  --sage-light:  #b5cdb5;
+  --sage-dark:   #5d7d5d;
+  --blush:       #e8c5b8;
+  --blush-light: #f5e4dd;
+  --brown:       #7a5c4a;
+  --text-dark:   #3a2e28;
+  --text-mid:    #6b5448;
+  --text-light:  #9a7c6e;
+  --gold:        #c4986a;
+  --red:         #b94040;
+  --red-light:   #f5e0e0;
+  --admin:       #4a6d8c;
+  --admin-light: #dce8f0;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+html { font-size:16px; }
+body { font-family:'Noto Sans JP',sans-serif; background:var(--cream); color:var(--text-dark); min-height:100vh; }
+/* ============================================================
+   HEADER
+============================================================ */
+.header {
+  background:white;
+  border-bottom:1px solid rgba(138,171,138,.2);
+  padding:14px 24px;
+  display:flex; align-items:center; justify-content:space-between;
+  position:sticky; top:0; z-index:60;
+  box-shadow:0 2px 12px rgba(58,46,40,.06);
+}
+.header-left   { display:flex; align-items:center; gap:12px; }
+.header-logo   { font-family:'Noto Serif JP',serif; font-size:15px; color:var(--text-dark); font-weight:500; }
+.header-sub    { font-size:11px; color:var(--text-light); font-family:'Cormorant Garamond',serif; font-style:italic; }
+.divider-v     { width:1px; height:28px; background:rgba(138,171,138,.3); }
+.header-title  { font-size:15px; font-weight:500; color:var(--text-mid); }
+.header-right  { display:flex; align-items:center; gap:10px; }
+.admin-badge {
+  background:var(--admin-light); color:var(--admin);
+  padding:6px 14px; border-radius:50px; font-size:12px; font-weight:500;
+  display:flex; align-items:center; gap:8px;
+}
+.btn-patient-link {
+  font-size:12px; color:var(--text-light); text-decoration:none;
+  padding:6px 14px; border:1px solid rgba(138,171,138,.3); border-radius:50px;
+  transition:all .2s; white-space:nowrap;
+}
+.btn-patient-link:hover { background:rgba(138,171,138,.1); color:var(--text-mid); }
+/* ============================================================
+   LAYOUT
+============================================================ */
+.container-admin { max-width:1000px; margin:0 auto; padding:24px 20px 60px; }
+/* ============================================================
+   SUB TABS
+============================================================ */
+.sub-tabs {
+  background:white; border-bottom:1px solid rgba(74,109,140,.12);
+  display:flex; padding:0 24px; gap:2px; overflow-x:auto;
+}
+.sub-tab {
+  padding:12px 16px; font-size:13px; color:var(--text-light);
+  cursor:pointer; border-bottom:3px solid transparent;
+  transition:all .2s; white-space:nowrap;
+}
+.sub-tab:hover  { color:var(--admin); }
+.sub-tab.active { color:var(--admin); border-bottom-color:var(--admin); font-weight:500; }
+.asec      { display:none; }
+.asec.on   { display:block; }
+/* ============================================================
+   CARD
+============================================================ */
+.card {
+  background:white; border-radius:16px; padding:24px;
+  box-shadow:0 2px 12px rgba(40,56,80,.05); margin-bottom:20px;
+}
+.card-title {
+  font-family:'Noto Serif JP',serif; font-size:16px; font-weight:500; color:var(--text-dark);
+  margin-bottom:18px; display:flex; align-items:center; gap:8px; flex-wrap:wrap;
+}
+.card-title-action { margin-left:auto; display:flex; gap:8px; align-items:center; }
+/* ============================================================
+   STATS
+============================================================ */
+.stats-row { display:flex; gap:14px; margin-bottom:22px; flex-wrap:wrap; }
+.stat-chip { background:white; border-radius:14px; padding:15px 18px; box-shadow:0 2px 10px rgba(40,56,80,.06); flex:1; min-width:120px; }
+.stat-label { font-size:11px; color:var(--text-light); letter-spacing:.05em; margin-bottom:5px; }
+.stat-value { font-family:'Noto Serif JP',serif; font-size:24px; font-weight:500; color:var(--text-dark); }
+.stat-sub   { font-size:11px; color:var(--text-light); margin-top:2px; }
+/* ============================================================
+   DATE NAV (ADMIN)
+============================================================ */
+.date-nav-admin { display:flex; align-items:center; justify-content:space-between; margin-bottom:18px; gap:12px; flex-wrap:wrap; }
+.date-nav-center { display:flex; align-items:center; gap:12px; }
+.date-btn {
+  background:none; border:1px solid rgba(74,109,140,.25); color:var(--admin);
+  width:34px; height:34px; border-radius:50%; cursor:pointer; font-size:16px;
+  transition:all .2s; display:flex; align-items:center; justify-content:center;
+}
+.date-btn:hover { background:var(--admin-light); border-color:var(--admin-light); }
+.date-display-sm  { font-family:'Noto Serif JP',serif; font-size:17px; color:var(--text-dark); min-width:165px; text-align:center; }
+.today-btn {
+  background:none; border:1px solid rgba(74,109,140,.3); color:var(--admin);
+  padding:5px 12px; border-radius:50px; font-size:12px; font-family:'Noto Sans JP',sans-serif;
+  cursor:pointer; transition:all .2s;
+}
+.today-btn:hover { background:var(--admin-light); }
+/* ============================================================
+   WEEK CALENDAR
+============================================================ */
+.week-label { font-family:'Noto Serif JP',serif; font-size:15px; color:var(--text-dark); flex:1; padding:0 10px; }
+.cal-wrap  { overflow-x:auto; }
+.cal-table { width:100%; border-collapse:separate; border-spacing:4px; min-width:520px; }
+.cal-table th { font-size:11px; font-weight:500; color:var(--text-light); padding:7px 4px; text-align:center; white-space:nowrap; }
+.cal-table th.today-col { color:var(--admin); }
+.cal-time  { font-size:11px; color:var(--text-light); text-align:right; padding:0 8px 0 0; white-space:nowrap; width:50px; vertical-align:middle; }
+.ccell { border-radius:6px; padding:4px 5px; text-align:center; font-size:10px; min-height:34px; display:flex; flex-direction:column; align-items:center; justify-content:center; transition:all .15s; }
+.cc-free    { background:rgba(138,171,138,.12); color:var(--sage-dark); }
+.cc-half    { background:rgba(196,152,106,.18); color:var(--brown); }
+.cc-full    { background:rgba(185,64,64,.12);   color:var(--red); }
+.cc-blocked { background:rgba(58,46,40,.08);    color:var(--text-mid); }
+.cc-past    { opacity:.4; }
+/* ============================================================
+   BLOCK GRID
+============================================================ */
+.bgrid { display:grid; grid-template-columns:106px repeat(2,1fr); gap:7px; margin-top:8px; }
+.bhead { font-size:12px; font-weight:500; color:var(--text-dark); padding:8px; text-align:center; }
+.btime { font-size:12px; color:var(--text-mid); padding:8px; text-align:right; display:flex; align-items:center; justify-content:flex-end; }
+.btoggle { border-radius:8px; padding:8px 6px; text-align:center; cursor:pointer; transition:all .18s; font-size:11px; border:2px solid transparent; min-height:44px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px; }
+.bt-open   { background:rgba(138,171,138,.12); border-color:rgba(138,171,138,.2); color:var(--sage-dark); }
+.bt-open:hover   { border-color:var(--sage); background:rgba(138,171,138,.22); }
+.bt-closed { background:rgba(185,64,64,.1);  border-color:rgba(185,64,64,.3);  color:var(--red); }
+.bt-closed:hover { background:rgba(185,64,64,.2); }
+.bt-booked { background:rgba(138,171,138,.05); cursor:default; opacity:.5; }
+.bt-unavailable { background:rgba(58,46,40,.08); color:var(--text-mid); cursor:default; }
+.bt-note   { font-size:9px; opacity:.7; margin-top:1px; }
+.room-unavailable-btns { display:flex; gap:8px; flex-wrap:wrap; }
+.btn-room-off { padding:8px 16px; border-radius:50px; font-size:12px; font-family:'Noto Sans JP',sans-serif; cursor:pointer; transition:all .2s; border:2px solid rgba(74,109,140,.25); background:white; color:var(--text-mid); }
+.btn-room-off:hover { border-color:var(--admin); background:var(--admin-light); color:var(--admin); }
+.btn-room-off.active { background:var(--admin); color:white; border-color:var(--admin); }
+.btn-room-off.active-unav { background:var(--red); color:white; border-color:var(--red); }
+/* ============================================================
+   ADMIN TABLE
+============================================================ */
+.rtable { width:100%; border-collapse:collapse; }
+.rtable th { font-size:12px; font-weight:500; color:var(--text-light); padding:8px 12px; text-align:left; border-bottom:1px solid rgba(138,171,138,.15); white-space:nowrap; }
+.rtable td { font-size:13px; padding:10px 12px; border-bottom:1px solid var(--cream); vertical-align:middle; }
+.rtable tr:last-child td { border-bottom:none; }
+.rtable tr:hover td { background:rgba(74,109,140,.025); }
+.rtable .empty td { text-align:center; color:var(--text-light); font-style:italic; padding:28px; }
+.room-badge { display:inline-block; padding:3px 10px; border-radius:50px; font-size:11px; font-weight:500; }
+.room-A  { background:rgba(138,171,138,.15); color:var(--sage-dark); }
+.room-B  { background:rgba(196,152,106,.15); color:var(--brown); }
+.sbadge  { display:inline-block; padding:3px 10px; border-radius:50px; font-size:11px; }
+.sb-staff   { background:rgba(74,109,140,.1);  color:var(--admin); }
+.sb-patient { background:rgba(196,152,106,.15); color:var(--brown); }
+.sb-blocked { background:rgba(185,64,64,.1);   color:var(--red); }
+/* ============================================================
+   BUTTONS
+============================================================ */
+.btn-primary   { background:var(--admin); color:white; border:none; padding:9px 18px; border-radius:50px; font-size:13px; font-family:'Noto Sans JP',sans-serif; cursor:pointer; transition:all .2s; display:inline-flex; align-items:center; gap:5px; box-shadow:0 3px 10px rgba(74,109,140,.3); }
+.btn-primary:hover { background:#3a5a7a; transform:translateY(-1px); }
+.btn-secondary { background:none; border:1px solid rgba(74,109,140,.3); color:var(--admin); padding:9px 16px; border-radius:50px; font-size:13px; font-family:'Noto Sans JP',sans-serif; cursor:pointer; transition:all .2s; }
+.btn-secondary:hover { background:var(--admin-light); }
+.btn-danger    { background:var(--red); color:white; border:none; padding:9px 20px; border-radius:50px; font-size:13px; font-family:'Noto Sans JP',sans-serif; cursor:pointer; transition:all .2s; }
+.btn-danger:hover { background:#963030; }
+.btn-sm { background:none; border:1px solid rgba(185,64,64,.3); color:var(--red); padding:4px 11px; border-radius:50px; font-size:11px; font-family:'Noto Sans JP',sans-serif; cursor:pointer; transition:all .2s; }
+.btn-sm:hover { background:var(--red-light); border-color:var(--red); }
+/* ============================================================
+   MODALS
+============================================================ */
+.modal-overlay {
+  position:fixed; inset:0; background:rgba(40,46,56,.5); backdrop-filter:blur(4px);
+  z-index:100; display:flex; align-items:center; justify-content:center;
+  opacity:0; pointer-events:none; transition:opacity .3s;
+}
+.modal-overlay.show { opacity:1; pointer-events:all; }
+.modal {
+  background:white; border-radius:24px; padding:38px; max-width:420px; width:calc(100% - 36px);
+  text-align:center; transform:scale(.9);
+  transition:transform .3s cubic-bezier(.34,1.56,.64,1); box-shadow:0 20px 60px rgba(40,46,56,.2);
+}
+.modal-overlay.show .modal { transform:scale(1); }
+.modal-icon  { font-size:46px; margin-bottom:14px; }
+.modal-title { font-family:'Noto Serif JP',serif; font-size:19px; font-weight:500; color:var(--text-dark); margin-bottom:9px; }
+.modal-body  { font-size:13px; color:var(--text-mid); line-height:1.9; margin-bottom:16px; }
+.modal-btns  { display:flex; gap:10px; justify-content:center; margin-top:18px; }
+.modal-btn-confirm { background:var(--sage-dark); color:white; border:none; padding:11px 28px; border-radius:50px; font-size:14px; font-family:'Noto Sans JP',sans-serif; cursor:pointer; transition:all .2s; }
+.modal-btn-confirm:hover { background:var(--sage); }
+.modal-btn-back { background:none; border:1px solid rgba(138,171,138,.4); color:var(--text-light); padding:11px 22px; border-radius:50px; font-size:13px; font-family:'Noto Sans JP',sans-serif; cursor:pointer; transition:all .2s; }
+.modal-btn-back:hover { border-color:var(--text-light); color:var(--text-mid); }
+/* ============================================================
+   FORM
+============================================================ */
+.form-row   { display:flex; gap:12px; margin-bottom:12px; flex-wrap:wrap; }
+.form-group { flex:1; min-width:130px; text-align:left; }
+.form-label { display:block; font-size:12px; color:var(--text-light); margin-bottom:5px; letter-spacing:.04em; }
+.form-input,.form-select {
+  width:100%; padding:10px 14px; border:1px solid rgba(138,171,138,.3); border-radius:9px;
+  font-size:13px; font-family:'Noto Sans JP',sans-serif; color:var(--text-dark);
+  background:var(--cream); outline:none; transition:border-color .2s;
+}
+.form-input:focus,.form-select:focus { border-color:var(--admin); background:white; }
+.form-input::placeholder { color:var(--text-light); }
+.form-input.err { border-color:var(--red); }
+/* ============================================================
+   TOAST
+============================================================ */
+.toast {
+  position:fixed; top:72px; left:50%; transform:translateX(-50%) translateY(-20px);
+  color:white; padding:10px 24px; border-radius:50px; font-size:13px; opacity:0;
+  transition:all .3s; z-index:300; white-space:nowrap; pointer-events:none;
+  background:var(--sage-dark); box-shadow:0 4px 18px rgba(93,125,93,.4);
+}
+.toast.show  { opacity:1; transform:translateX(-50%) translateY(0); }
+.toast.terr  { background:var(--red); box-shadow:0 4px 18px rgba(185,64,64,.4); }
+.toast.tadm  { background:var(--admin); box-shadow:0 4px 18px rgba(74,109,140,.4); }
+/* ============================================================
+   RESPONSIVE
+============================================================ */
+@media (max-width:520px) {
+  .header  { padding:12px 14px; }
+  .header-sub,.divider-v { display:none; }
+  .container-admin { padding:14px 10px 60px; }
+  .bgrid { grid-template-columns:68px repeat(2,1fr); gap:5px; }
+  .sub-tab { padding:12px 14px; font-size:12px; }
+}
+</style>
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-functions-compat.js"></script>
+</head>
+<body>
+<!-- Loading Overlay -->
+<div id="fbLoading" style="position:fixed;inset:0;background:var(--cream);z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px">
+  <div style="font-family:'Noto Serif JP',serif;font-size:20px;color:var(--admin)">⚙️ 管理者画面</div>
+  <div style="width:40px;height:40px;border:3px solid rgba(74,109,140,.2);border-top-color:var(--admin);border-radius:50%;animation:spin .8s linear infinite"></div>
+  <div id="fbLoadingMsg" style="font-size:13px;color:var(--text-light)">接続中…</div>
+</div>
+<style>@keyframes spin{to{transform:rotate(360deg)}}</style>
+<!-- ===================================================
+     HEADER
+=================================================== -->
+<div class="header">
+  <div class="header-left">
+    <div>
+      <div class="header-logo">清稜クリニック</div>
+      <div class="header-sub">Seiryo Clinic</div>
+    </div>
+    <div class="divider-v"></div>
+    <div class="header-title">🔧 管理画面</div>
+  </div>
+  <div class="header-right">
+    <a href="index.html" class="btn-patient-link">🚿 患者ページ</a>
+    <div id="adminBadge" class="admin-badge" style="display:none">
+      ⚙️ 管理者モード
+      <button onclick="adminSignOut()" style="padding:3px 10px;font-size:11px;background:rgba(74,109,140,.15);border:1px solid rgba(74,109,140,.3);border-radius:4px;color:var(--admin);cursor:pointer;font-family:'Noto Sans JP',sans-serif;">ログアウト</button>
+    </div>
+  </div>
+</div>
+<!-- ===================================================
+     SUB TABS
+=================================================== -->
+<div class="sub-tabs">
+  <div class="sub-tab active" id="stab0" onclick="switchAdminTab(0)">📊 当日の予約</div>
+  <div class="sub-tab"        id="stab1" onclick="switchAdminTab(1)">📅 週間カレンダー</div>
+  <div class="sub-tab"        id="stab2" onclick="switchAdminTab(2)">📋 全予約一覧</div>
+  <div class="sub-tab"        id="stab3" onclick="switchAdminTab(3)">🚫 使用停止設定</div>
+  <div class="sub-tab"        id="stab4" onclick="switchAdminTab(4)">👤 患者管理</div>
+</div>
+<!-- ===================================================
+     ADMIN SECTIONS
+=================================================== -->
+<div class="container-admin">
+  <!-- SUB 0: 当日 -->
+  <div class="asec on" id="asec0">
+    <div class="stats-row" id="aStatsRow"></div>
+    <div class="card">
+      <div class="card-title">
+        <span id="aOvTitle">本日の予約</span>
+        <div class="card-title-action"><button class="btn-primary" onclick="openAddModal()">＋ 代理予約</button></div>
+      </div>
+      <div class="date-nav-admin">
+        <div class="date-nav-center">
+          <button class="date-btn" onclick="aChangeOvDay(-1)">‹</button>
+          <div class="date-display-sm" id="aOvDate"></div>
+          <button class="date-btn" onclick="aChangeOvDay(1)">›</button>
+        </div>
+        <button class="today-btn" onclick="aOvDay=0;renderAdminOverview()">今日に戻る</button>
+      </div>
+      <table class="rtable"><thead><tr><th>時間</th><th>シャワー室</th><th>患者名</th><th>部屋番号</th><th>種別</th><th></th></tr></thead>
+      <tbody id="aOvTbody"></tbody></table>
+    </div>
+  </div>
+  <!-- SUB 1: カレンダー -->
+  <div class="asec" id="asec1">
+    <div class="card">
+      <div class="card-title">週間カレンダー</div>
+      <div class="date-nav-admin" style="margin-bottom:14px">
+        <button class="date-btn" onclick="aChangeWeek(-1)">‹</button>
+        <div class="week-label" id="aWeekLabel"></div>
+        <button class="date-btn" onclick="aChangeWeek(1)">›</button>
+        <button class="today-btn" onclick="aWkOff=0;renderAdminCalendar()">今週</button>
+      </div>
+      <div class="cal-wrap"><table class="cal-table" id="aCalTable"></table></div>
+      <div style="display:flex;gap:14px;flex-wrap:wrap;margin-top:14px;">
+        <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text-light);"><div style="width:12px;height:12px;border-radius:3px;background:rgba(138,171,138,.18)"></div>空き</div>
+        <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text-light);"><div style="width:12px;height:12px;border-radius:3px;background:rgba(196,152,106,.25)"></div>一部予約</div>
+        <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text-light);"><div style="width:12px;height:12px;border-radius:3px;background:rgba(185,64,64,.18)"></div>満室</div>
+        <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text-light);"><div style="width:12px;height:12px;border-radius:3px;background:rgba(58,46,40,.1)"></div>使用停止</div>
+      </div>
+    </div>
+  </div>
+  <!-- SUB 2: 全一覧 -->
+  <div class="asec" id="asec2">
+    <div class="card">
+      <div class="card-title">全予約一覧
+        <div class="card-title-action">
+          <select class="form-select" id="aFilterRoom" onchange="renderAdminAllList()" style="width:130px;padding:7px 10px">
+            <option value="">全シャワー室</option><option value="A">室 A</option><option value="B">室 B</option>
+          </select>
+          <button class="btn-primary" onclick="openAddModal()">＋ 代理予約</button>
+        </div>
+      </div>
+      <table class="rtable"><thead><tr><th>日付</th><th>時間</th><th>シャワー室</th><th>患者名</th><th>部屋番号</th><th>種別</th><th></th></tr></thead>
+      <tbody id="aAllTbody"></tbody></table>
+    </div>
+  </div>
+  <!-- SUB 3: 使用停止 -->
+  <div class="asec" id="asec3">
+    <div class="card">
+      <div class="card-title">シャワー室の使用停止設定</div>
+      <p style="font-size:13px;color:var(--text-mid);margin-bottom:16px;line-height:1.8">清掃・故障などで特定の時間帯を停止できます。停止中の枠は患者さんに「予約済み」と表示されます。<br><strong>※患者予約済みの枠は停止不可です。先に削除してください。</strong></p>
+      <div class="date-nav-admin">
+        <div class="date-nav-center">
+          <button class="date-btn" onclick="aChangeBlDay(-1)">‹</button>
+          <div class="date-display-sm" id="aBlDate"></div>
+          <button class="date-btn" onclick="aChangeBlDay(1)">›</button>
+        </div>
+        <button class="today-btn" onclick="aBlDay=0;renderAdminBlock()">今日</button>
+      </div>
+      <div style="margin-bottom:14px">
+        <div style="font-size:13px;font-weight:500;color:var(--text-dark);margin-bottom:10px">① 室ごとに1日まるごと使用停止</div>
+        <div class="room-unavailable-btns">
+          <button type="button" class="btn-room-off" id="aBtnRoomOffNone" onclick="aSetRoomUnavailable(null)">両方使用可</button>
+          <button type="button" class="btn-room-off" id="aBtnRoomOffA" onclick="aSetRoomUnavailable('A')">A室を使用不可</button>
+          <button type="button" class="btn-room-off" id="aBtnRoomOffB" onclick="aSetRoomUnavailable('B')">B室を使用不可</button>
+          <button type="button" class="btn-room-off" id="aBtnRoomOffBoth" onclick="aSetRoomUnavailable('AB')">両方使用不可</button>
+        </div>
+        <div style="margin-top:8px;font-size:12px;color:var(--text-light)">選択した室は当日すべての時間帯が使用停止となり、患者画面に「使用不可」と表示されます。</div>
+      </div>
+      <div style="border-top:1px solid rgba(138,171,138,.2);margin:16px 0"></div>
+      <div style="font-size:13px;font-weight:500;color:var(--text-dark);margin-bottom:10px">② 時間枠ごとに個別使用停止</div>
+      <div style="font-size:12px;color:var(--text-light);margin-bottom:12px">停止したい枠をクリックするとON/OFFが切り替わります。<span style="background:rgba(185,64,64,.1);color:var(--red);padding:1px 8px;border-radius:50px;margin-left:4px;font-size:11px">🚫 停止中</span> の枠をクリックすると再開できます。</div>
+      <div class="bgrid" id="aBgrid"></div>
+    </div>
+  </div>
+  <!-- SUB 4: 患者管理 -->
+  <div class="asec" id="asec4">
+    <div class="card">
+      <div class="card-title">👤 患者アカウント管理
+        <div class="card-title-action" style="font-size:12px;color:var(--text-light);font-weight:400">登録患者数：<span id="aPatCount">0</span> 名</div>
+      </div>
+      <p style="font-size:13px;color:var(--text-mid);margin-bottom:16px;line-height:1.8">患者アカウントを削除すると、患者情報と将来の予約が削除されます。<br><strong>※ ログインアカウント（メールアドレス）は別途削除が必要な場合があります。</strong></p>
+      <table class="rtable" id="aPatTable">
+        <thead><tr><th>患者名</th><th>部屋番号</th><th>予約数</th><th></th></tr></thead>
+        <tbody id="aPatTbody"></tbody>
+      </table>
+    </div>
+  </div>
+</div><!-- /container-admin -->
+<!-- ===================================================
+     MODALS
+=================================================== -->
+<!-- Admin auth -->
+<div class="modal-overlay" id="moAuth">
+  <div class="modal">
+    <div class="modal-icon">🔐</div>
+    <div class="modal-title">管理者認証</div>
+    <div class="modal-body">管理者のメールアドレスとパスワードを入力してください。</div>
+    <div class="form-group" style="margin-bottom:8px">
+      <input class="form-input" type="email" id="authEmail" placeholder="admin@example.com">
+    </div>
+    <div class="form-group" style="margin-bottom:4px">
+      <input class="form-input" type="password" id="authPw" placeholder="パスワード">
+    </div>
+    <div id="authErr" style="font-size:12px;color:var(--red);margin-top:6px;display:none">メールアドレスまたはパスワードが違います</div>
+    <div class="modal-btns">
+      <button class="modal-btn-confirm" style="background:var(--admin)" onclick="doAuth()">ログイン</button>
+    </div>
+  </div>
+</div>
+<!-- Admin add booking -->
+<div class="modal-overlay" id="moAdd">
+  <div class="modal">
+    <div class="modal-icon">📝</div>
+    <div class="modal-title">代理予約の登録</div>
+    <div class="modal-body">患者さんの代わりに予約を登録します。</div>
+    <div class="form-group" style="margin-bottom:12px">
+      <label class="form-label">患者アカウント（登録済み）</label>
+      <select class="form-select" id="aAddPatientSelect" onchange="onAddPatientSelectChange()">
+        <option value="">（読み込み中…）</option>
+      </select>
+      <div style="font-size:11px;color:var(--text-light);margin-top:6px;line-height:1.6">
+        ここで選ぶと、下の「患者名」「部屋番号」は自動入力されます。未登録の方は「手入力」を選んでください。
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">日付 <span style="color:var(--red)">*</span></label>
+        <input class="form-input" type="date" id="aAddDate">
+      </div>
+      <div class="form-group">
+        <label class="form-label">時間帯 <span style="color:var(--red)">*</span></label>
+        <select class="form-select" id="aAddSlot"></select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">シャワー室 <span style="color:var(--red)">*</span></label>
+        <select class="form-select" id="aAddRoom">
+          <option value="A">シャワー室 A</option>
+          <option value="B">シャワー室 B</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">患者名 <span style="color:var(--red)">*</span></label>
+        <input class="form-input" type="text" id="aAddName" placeholder="山田 花子" maxlength="30">
+      </div>
+      <div class="form-group">
+        <label class="form-label">部屋番号</label>
+        <input class="form-input" type="text" id="aAddPid" placeholder="203号室" maxlength="20">
+      </div>
+    </div>
+    <div id="aAddErr" style="font-size:12px;color:var(--red);margin-top:4px;display:none"></div>
+    <div class="modal-btns">
+      <button class="btn-secondary" onclick="closeAddModal()">キャンセル</button>
+      <button class="btn-primary"   onclick="aDoAdd()">登録する</button>
+    </div>
+  </div>
+</div>
+<!-- Admin delete confirm -->
+<div class="modal-overlay" id="moDel">
+  <div class="modal">
+    <div class="modal-icon">🗑️</div>
+    <div class="modal-title">予約の削除</div>
+    <div class="modal-body">この予約を削除しますか？操作は取り消せません。</div>
+    <div id="aDelDetail" style="background:var(--cream);border-radius:12px;padding:14px;margin-bottom:4px;text-align:left;font-size:13px;line-height:2;color:var(--text-mid)"></div>
+    <div class="modal-btns">
+      <button class="btn-secondary" onclick="closeDelModal()">キャンセル</button>
+      <button class="btn-danger"    onclick="aDoDelete()">削除する</button>
+    </div>
+  </div>
+</div>
+<!-- Admin patient delete confirm -->
+<div class="modal-overlay" id="moPatDel">
+  <div class="modal">
+    <div class="modal-icon">👤</div>
+    <div class="modal-title">患者アカウントの削除</div>
+    <div class="modal-body">この患者の情報と将来の予約をすべて削除しますか？<br>操作は取り消せません。</div>
+    <div id="aPatDelDetail" style="background:var(--cream);border-radius:12px;padding:14px;margin-bottom:4px;text-align:left;font-size:13px;line-height:2;color:var(--text-mid)"></div>
+    <div class="modal-btns">
+      <button class="btn-secondary" onclick="closePatDelModal()">キャンセル</button>
+      <button class="btn-danger"    onclick="aDoDeletePatient()">削除する</button>
+    </div>
+  </div>
+</div>
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+<!-- ===================================================
+     SCRIPT
+=================================================== -->
+<script>
+/* ======================================================
+   FIREBASE CONFIG
+====================================================== */
+const firebaseConfig = {
+  apiKey:            "AIzaSyDSEWR4yP_uMiWqk6d8aQmQ91lOil0_rKI",
+  authDomain:        "seiryoshower.firebaseapp.com",
+  databaseURL:       "https://seiryoshower-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId:         "seiryoshower",
+  storageBucket:     "seiryoshower.firebasestorage.app",
+  messagingSenderId: "958585721632",
+  appId:             "1:958585721632:web:3e34d89842ad1fd7b8fd45"
+};
+/* ======================================================
+   CONFIG
+====================================================== */
+const ROOMS = ['A','B'];
+const ADMIN_AUTH_BYPASS = false;
+const SLOTS = [
+  {start:'8:45', end:'9:30'},  {start:'9:30',  end:'10:15'},
+  {start:'10:15',end:'11:00'}, {start:'11:00', end:'11:45'},
+];
+const WD = ['日','月','火','水','木','金','土'];
+/* ======================================================
+   FIREBASE INIT
+====================================================== */
+let db, adminDb, adminAuth, adminFunctions;
+try {
+  const app = firebase.initializeApp(firebaseConfig);
+  db   = firebase.database();
+  const adminApp = firebase.initializeApp(firebaseConfig, 'adminApp');
+  adminAuth      = firebase.auth(adminApp);
+  adminDb        = firebase.database(adminApp);
+  adminFunctions = firebase.app('adminApp').functions('asia-southeast1');
+} catch(e) {
+  document.getElementById('fbLoadingMsg').textContent = 'Firebase初期化エラー: ' + e.message;
+  throw e;
+}
+/* ======================================================
+   STATE
+====================================================== */
+let bookings        = {};
+let roomUnavailable = {};
+let patientsIndex   = [];
+let aOvDay = 0, aWkOff = 0, aBlDay = 0, aDelKey = null;
+let adminLoggedIn = false;
+let currentAdminTab = 0;
+let aPatDelUid = null;
+/* ======================================================
+   STORAGE
+====================================================== */
+function load()                { /* Firebase listener keeps bookings live */ }
+function loadRoomUnavailable() { /* Firebase listener keeps roomUnavailable live */ }
+function roomIsUnavailable(val, room){ return val===room || val==='AB'; }
+function saveRoomUnavailableKey(dayKey, value) {
+  if(value === null) adminDb.ref('roomUnavailable/' + dayKey).remove();
+  else               adminDb.ref('roomUnavailable/' + dayKey).set(value);
+}
+function adminSaveBooking(key, value) {
+  if(value === null) adminDb.ref('bookings/' + key).remove();
+  else               adminDb.ref('bookings/' + key).set(value);
+}
+/* ======================================================
+   DATE HELPERS
+====================================================== */
+function today()  { const d=new Date(); d.setHours(0,0,0,0); return d; }
+function dayFromOff(off) { const d=today(); d.setDate(d.getDate()+off); return d; }
+function offFromIso(iso) { const [y,m,d]=iso.split('-').map(Number); const t=new Date(y,m-1,d); return Math.round((t-today())/86400000); }
+function isoFromOff(off) { const d=dayFromOff(off); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
+function fmtFull(d)  { return `${d.getMonth()+1}月${d.getDate()}日（${WD[d.getDay()]}）`; }
+function fmtShort(d) { return `${d.getMonth()+1}/${d.getDate()}`; }
+function slotEnd(s)  { return (SLOTS.find(x=>x.start===s)||{end:'—'}).end; }
+/* ======================================================
+   ADMIN AUTH
+====================================================== */
+function openAuthModal(){
+  document.getElementById('authEmail').value = '';
+  document.getElementById('authPw').value = '';
+  document.getElementById('authErr').style.display = 'none';
+  document.getElementById('moAuth').classList.add('show');
+  setTimeout(()=>document.getElementById('authEmail').focus(),300);
+}
+function doAuth(){
+  const email = document.getElementById('authEmail').value.trim();
+  const pw    = document.getElementById('authPw').value;
+  const errEl = document.getElementById('authErr');
+  if(!email || !pw){
+    errEl.textContent = 'メールアドレスとパスワードを入力してください。';
+    errEl.style.display='block';
+    return;
+  }
+  adminAuth.signInWithEmailAndPassword(email, pw)
+    .then(() => {
+      // onAuthStateChanged が adminLoggedIn を更新してモーダルを閉じる
+    })
+    .catch((e) => {
+      const code = (e && e.code) || '';
+      let msg = 'ログインできませんでした。';
+      if(code==='auth/user-not-found')  msg = 'このメールアドレスのユーザーが見つかりません。';
+      else if(code==='auth/wrong-password' || code==='auth/invalid-credential') msg = 'メールアドレスまたはパスワードが違います。';
+      else if(code==='auth/invalid-email')   msg = 'メールアドレスの形式が正しくありません。';
+      else if(code==='auth/too-many-requests') msg = '試行回数が多すぎます。しばらく待ってから再度お試しください。';
+      else if(code) msg = `エラー: ${code}`;
+      errEl.textContent = msg;
+      errEl.style.display='block';
+    });
+}
+function adminSignOut(){
+  adminAuth.signOut().then(() => {
+    // onAuthStateChanged が adminLoggedIn を更新してモーダルを表示する
+    showToast('ログアウトしました');
+  });
+}
+/* ======================================================
+   ADMIN SUB TABS
+====================================================== */
+function switchAdminTab(i) {
+  currentAdminTab = i;
+  for(let j=0;j<5;j++){
+    document.getElementById(`stab${j}`).classList.toggle('active', j===i);
+    document.getElementById(`asec${j}`).classList.toggle('on', j===i);
+  }
+  if(i===0) renderAdminOverview();
+  if(i===1) renderAdminCalendar();
+  if(i===2) renderAdminAllList();
+  if(i===3) renderAdminBlock();
+  if(i===4) renderAdminPatients();
+}
+function renderCurrentAdminView(){
+  if(!adminLoggedIn) return;
+  if(currentAdminTab===0) renderAdminOverview();
+  else if(currentAdminTab===1) renderAdminCalendar();
+  else if(currentAdminTab===2) renderAdminAllList();
+  else if(currentAdminTab===3) renderAdminBlock();
+  else if(currentAdminTab===4) renderAdminPatients();
+}
+/* ======================================================
+   ADMIN — OVERVIEW
+====================================================== */
+function aChangeOvDay(d){ aOvDay+=d; renderAdminOverview(); }
+function renderAdminOverview(){
+  load();
+  const day=dayFromOff(aOvDay);
+  document.getElementById('aOvDate').textContent=fmtFull(day);
+  document.getElementById('aOvTitle').textContent=aOvDay===0?'本日の予約':aOvDay===1?'明日の予約':`${fmtFull(day)}の予約`;
+  const total=SLOTS.length*ROOMS.length; let bk=0,bl=0;
+  const dayRoomUnav=roomUnavailable[String(aOvDay)]||null;
+  SLOTS.forEach(({start})=>ROOMS.forEach(r=>{ if(roomIsUnavailable(dayRoomUnav,r)){bl++;return;} const b=bookings[`${aOvDay}_${start}_${r}`]; if(b){b.blocked?bl++:bk++;} }));
+  const fr=total-bk-bl, pct=total?Math.round(bk/total*100):0;
+  document.getElementById('aStatsRow').innerHTML=`
+    <div class="stat-chip"><div class="stat-label">本日の予約数</div><div class="stat-value">${bk}</div><div class="stat-sub">全${total}枠中</div></div>
+    <div class="stat-chip"><div class="stat-label">空き枠</div><div class="stat-value" style="color:var(--sage-dark)">${fr}</div><div class="stat-sub">予約可能</div></div>
+    <div class="stat-chip"><div class="stat-label">使用停止枠</div><div class="stat-value" style="color:var(--red)">${bl}</div><div class="stat-sub">停止中</div></div>
+    <div class="stat-chip"><div class="stat-label">稼働率</div><div class="stat-value" style="color:var(--admin)">${pct}<span style="font-size:14px">%</span></div><div class="stat-sub">（停止除く）</div></div>`;
+  const rows=[]; SLOTS.forEach(({start,end})=>ROOMS.forEach(r=>{ const key=`${aOvDay}_${start}_${r}`,b=bookings[key]; if(b) rows.push({start,end,r,key,b}); }));
+  rows.sort((a,b)=>a.start.localeCompare(b.start));
+  const tbody=document.getElementById('aOvTbody');
+  if(!rows.length){ tbody.innerHTML='<tr class="empty"><td colspan="6">この日の予約はありません</td></tr>'; return; }
+  tbody.innerHTML=rows.map(({start,end,r,key,b})=>`<tr>
+    <td><strong>${start}</strong>〜${end}</td>
+    <td><span class="room-badge room-${r}">室 ${r}</span></td>
+    <td style="font-weight:500">${b.blocked?'— 使用停止 —':(b.patientName||'—')}</td>
+    <td style="color:var(--text-light);font-size:12px">${b.blocked?(b.reason||''):(b.patientId||'—')}</td>
+    <td><span class="sbadge ${b.blocked?'sb-blocked':(b.mine?'sb-patient':'sb-staff')}">${b.blocked?'停止中':(b.mine?'患者':'スタッフ')}</span></td>
+    <td><button class="btn-sm" onclick="openDelModal('${key}')">削除</button></td>
+  </tr>`).join('');
+}
+/* ======================================================
+   ADMIN — CALENDAR
+====================================================== */
+function aChangeWeek(d){ aWkOff+=d; renderAdminCalendar(); }
+function renderAdminCalendar(){
+  load();
+  const s0=aWkOff*7, s6=s0+6;
+  document.getElementById('aWeekLabel').textContent=`${fmtShort(dayFromOff(s0))} 〜 ${fmtShort(dayFromOff(s6))}`;
+  const tbl=document.getElementById('aCalTable'); tbl.innerHTML='';
+  let h=`<thead><tr><th style="width:50px"></th>`;
+  for(let d=s0;d<=s6;d++){
+    const day=dayFromOff(d); const it=d===0;
+    h+=`<th${it?' class="today-col"':''}>${day.getMonth()+1}/${day.getDate()}<br><span style="font-size:10px">${WD[day.getDay()]}</span>${it?'<br><span style="font-size:9px;background:var(--admin);color:white;padding:1px 5px;border-radius:4px">今日</span>':''}</th>`;
+  }
+  h+='</tr></thead><tbody>';
+  SLOTS.forEach(({start})=>{
+    h+=`<tr><td class="cal-time">${start}</td>`;
+    for(let d=s0;d<=s6;d++){
+      const dayUnav=roomUnavailable[String(d)]||null;
+      let bk=0,bl=0; ROOMS.forEach(r=>{if(roomIsUnavailable(dayUnav,r)){bl++;return;} const b=bookings[`${d}_${start}_${r}`];if(b){b.blocked?bl++:bk++;}});
+      const total=ROOMS.length,isPast=d<0;
+      let cls='cc-free',txt='空き';
+      if(bl===total){cls='cc-blocked';txt='停止';}
+      else if(bk+bl===total){cls='cc-full';txt='満室';}
+      else if(bk>0||bl>0){cls='cc-half';txt=`空${total-bk-bl}`;}
+      h+=`<td><div class="ccell ${cls}${isPast?' cc-past':''}">${txt}</div></td>`;
+    }
+    h+='</tr>';
+  });
+  tbl.innerHTML+=h+'</tbody>';
+}
+/* ======================================================
+   ADMIN — ALL LIST
+====================================================== */
+function renderAdminAllList(){
+  load();
+  const rf=document.getElementById('aFilterRoom').value;
+  const rows=Object.entries(bookings)
+    .map(([k,b])=>{const[ds,st,r]=k.split('_');return{dayOff:+ds,start:st,end:slotEnd(st),r,k,b};})
+    .filter(x=>!rf||x.r===rf)
+    .sort((a,b)=>a.dayOff-b.dayOff||a.start.localeCompare(b.start));
+  const tbody=document.getElementById('aAllTbody');
+  if(!rows.length){tbody.innerHTML='<tr class="empty"><td colspan="7">予約が見つかりません</td></tr>';return;}
+  tbody.innerHTML=rows.map(({dayOff,start,end,r,k,b})=>`<tr>
+    <td style="white-space:nowrap;font-size:12px">${fmtFull(dayFromOff(dayOff))}</td>
+    <td><strong>${start}</strong>〜${end}</td>
+    <td><span class="room-badge room-${r}">室 ${r}</span></td>
+    <td style="font-weight:500">${b.blocked?'— 使用停止 —':(b.patientName||'—')}</td>
+    <td style="color:var(--text-light);font-size:12px">${b.blocked?(b.reason||''):(b.patientId||'—')}</td>
+    <td><span class="sbadge ${b.blocked?'sb-blocked':(b.mine?'sb-patient':'sb-staff')}">${b.blocked?'停止中':(b.mine?'患者':'スタッフ')}</span></td>
+    <td><button class="btn-sm" onclick="openDelModal('${k}')">削除</button></td>
+  </tr>`).join('');
+}
+/* ======================================================
+   ADMIN — BLOCK
+====================================================== */
+function aChangeBlDay(d){ aBlDay+=d; renderAdminBlock(); }
+function aSetRoomUnavailable(room){
+  if(room) roomUnavailable[String(aBlDay)]=room; else delete roomUnavailable[String(aBlDay)];
+  saveRoomUnavailableKey(String(aBlDay), room||null);
+  const msg=!room?'両方の室を使用可にしました':room==='AB'?'両方の室を使用不可にしました':`室 ${room} をこの日は使用不可にしました`;
+  showToast(msg, 'tadm');
+}
+function renderAdminBlock(){
+  load();
+  loadRoomUnavailable();
+  document.getElementById('aBlDate').textContent=fmtFull(dayFromOff(aBlDay));
+  const unav=roomUnavailable[String(aBlDay)]||null;
+  document.getElementById('aBtnRoomOffNone').classList.toggle('active',!unav);
+  document.getElementById('aBtnRoomOffNone').classList.remove('active-unav');
+  document.getElementById('aBtnRoomOffA').classList.toggle('active-unav',unav==='A');
+  document.getElementById('aBtnRoomOffA').classList.remove('active');
+  document.getElementById('aBtnRoomOffB').classList.toggle('active-unav',unav==='B');
+  document.getElementById('aBtnRoomOffB').classList.remove('active');
+  document.getElementById('aBtnRoomOffBoth').classList.toggle('active-unav',unav==='AB');
+  document.getElementById('aBtnRoomOffBoth').classList.remove('active');
+  const grid=document.getElementById('aBgrid'); grid.innerHTML='';
+  const empty=document.createElement('div'); empty.className='bhead'; grid.appendChild(empty);
+  ROOMS.forEach(r=>{ const h=document.createElement('div');h.className='bhead'; h.innerHTML=roomIsUnavailable(unav,r)?`🚿 室 ${r}<br><span style="font-size:10px;color:var(--red)">使用不可</span>`:`🚿 シャワー室 ${r}`; grid.appendChild(h); });
+  SLOTS.forEach(({start,end})=>{
+    const tl=document.createElement('div');tl.className='btime';tl.textContent=`${start}〜${end}`;grid.appendChild(tl);
+    ROOMS.forEach(r=>{
+      const key=`${aBlDay}_${start}_${r}`,b=bookings[key];
+      const isUnav=roomIsUnavailable(unav,r), isBl=b&&b.blocked, isBk=b&&!b.blocked;
+      const cell=document.createElement('div');
+      if(isUnav){ cell.className='btoggle bt-unavailable'; cell.innerHTML='<div>使用不可</div>'; }
+      else if(isBk){ cell.className='btoggle bt-booked'; cell.innerHTML=`<div style="font-size:11px;color:var(--text-light)">予約済</div><div class="bt-note">${b.patientName||'—'}</div>`; }
+      else {
+        cell.className=`btoggle ${isBl?'bt-closed':'bt-open'}`;
+        cell.innerHTML=isBl?`<div>🚫 停止中</div><div class="bt-note">${b.reason||'使用停止'}</div>`:`<div>✓ 利用可</div>`;
+        cell.onclick=()=>aToggleBlock(key,!isBl,start,r);
+      }
+      grid.appendChild(cell);
+    });
+  });
+}
+function aToggleBlock(key,toBlock,start,r){
+  if(toBlock){
+    adminSaveBooking(key, {blocked:true, reason:'使用停止', mine:false, patientName:'使用停止', patientId:''});
+  } else {
+    adminSaveBooking(key, null);
+  }
+  showToast(toBlock?`🚫 室${r} ${start}〜 を停止しました`:`✓ 室${r} ${start}〜 を再開しました`, toBlock?'err':'');
+}
+/* ======================================================
+   ADMIN — ADD MODAL
+====================================================== */
+function normalizePatientOptionText(v){
+  const name = (v?.name || '').trim();
+  const pid  = (v?.pid  || '').trim();
+  if(name && pid) return `${name}（${pid}）`;
+  if(name) return `${name}`;
+  if(pid)  return `（${pid}）`;
+  return '（不明）';
+}
+function renderAddPatientSelect(){
+  const sel = document.getElementById('aAddPatientSelect');
+  if(!sel) return;
+  const prev = sel.value;
+  const opts = [];
+  opts.push(`<option value="">手入力（未登録／検索せず入力）</option>`);
+  if(!patientsIndex.length){
+    opts.push(`<option value="__none__" disabled>（患者アカウントなし）</option>`);
+  } else {
+    patientsIndex.forEach(p=>{
+      const label = normalizePatientOptionText(p).replace(/</g,'&lt;').replace(/>/g,'&gt;');
+      opts.push(`<option value="${p.uid}">${label}</option>`);
+    });
+  }
+  sel.innerHTML = opts.join('');
+  if(prev && Array.from(sel.options).some(o=>o.value===prev)) sel.value = prev;
+  else sel.value = '';
+}
+function onAddPatientSelectChange(){
+  const uid = document.getElementById('aAddPatientSelect').value;
+  const nameEl = document.getElementById('aAddName');
+  const pidEl  = document.getElementById('aAddPid');
+  document.getElementById('aAddErr').style.display='none';
+  nameEl.classList.remove('err');
+  if(!uid){ nameEl.disabled=false; pidEl.disabled=false; return; }
+  const p = patientsIndex.find(x=>x.uid===uid);
+  if(!p)  { nameEl.disabled=false; pidEl.disabled=false; return; }
+  nameEl.value = (p.name || '').trim();
+  pidEl.value  = (p.pid  || '').trim();
+  nameEl.disabled = true;
+  pidEl.disabled  = true;
+}
+function openAddModal(){
+  document.getElementById('aAddDate').value=isoFromOff(aOvDay);
+  document.getElementById('aAddName').value='';
+  document.getElementById('aAddPid').value='';
+  document.getElementById('aAddName').classList.remove('err');
+  document.getElementById('aAddSlot').innerHTML=SLOTS.map(s=>`<option value="${s.start}">${s.start}〜${s.end}</option>`).join('');
+  document.getElementById('aAddErr').style.display='none';
+  renderAddPatientSelect();
+  document.getElementById('aAddPatientSelect').value = '';
+  onAddPatientSelectChange();
+  document.getElementById('moAdd').classList.add('show');
+  setTimeout(()=>document.getElementById('aAddPatientSelect').focus(),250);
+}
+function closeAddModal(){ document.getElementById('moAdd').classList.remove('show'); }
+function aDoAdd(){
+  load();
+  const date=document.getElementById('aAddDate').value;
+  const start=document.getElementById('aAddSlot').value;
+  const room=document.getElementById('aAddRoom').value;
+  const selectedUid = document.getElementById('aAddPatientSelect').value;
+  let name=document.getElementById('aAddName').value.trim();
+  let pid=document.getElementById('aAddPid').value.trim();
+  const errEl=document.getElementById('aAddErr');
+  let patientUid = '';
+  if(selectedUid){
+    const p = patientsIndex.find(x=>x.uid===selectedUid);
+    if(p){ patientUid=p.uid; name=(p.name||'').trim(); pid=(p.pid||'').trim(); }
+  }
+  if(!name){ document.getElementById('aAddName').classList.add('err'); errEl.textContent='患者名を入力してください。'; errEl.style.display='block'; return; }
+  if(!date){ errEl.textContent='日付を選択してください。'; errEl.style.display='block'; return; }
+  const off=offFromIso(date),key=`${off}_${start}_${room}`;
+  if(bookings[key]){ errEl.textContent='この時間帯はすでに予約されています。'; errEl.style.display='block'; return; }
+  if(roomIsUnavailable(roomUnavailable[String(off)],room)){ errEl.textContent='この室はこの日は使用不可に設定されています。'; errEl.style.display='block'; return; }
+  adminSaveBooking(key, {patientName:name, patientId:pid, patientUid:patientUid, mine:!!patientUid, byStaff:true});
+  closeAddModal(); showToast('✓ 代理予約を登録しました','tadm');
+}
+/* ======================================================
+   ADMIN — DELETE
+====================================================== */
+function openDelModal(key){
+  load(); aDelKey=key;
+  const[ds,st,r]=key.split('_'),b=bookings[key],off=+ds;
+  document.getElementById('aDelDetail').innerHTML=
+    `<div><strong>日付：</strong>${fmtFull(dayFromOff(off))}</div>
+     <div><strong>時間：</strong>${st}〜${slotEnd(st)}（45分）</div>
+     <div><strong>シャワー室：</strong>シャワー室 ${r}</div>
+     <div><strong>患者名：</strong>${b?(b.blocked?'使用停止':(b.patientName||'—')):'—'}</div>`;
+  document.getElementById('moDel').classList.add('show');
+}
+function closeDelModal(){ document.getElementById('moDel').classList.remove('show'); aDelKey=null; }
+function aDoDelete(){
+  if(!aDelKey) return;
+  adminSaveBooking(aDelKey, null);
+  closeDelModal(); showToast('予約を削除しました');
+}
+/* ======================================================
+   ADMIN — PATIENT MANAGEMENT
+====================================================== */
+function renderAdminPatients(){
+  const tbody = document.getElementById('aPatTbody');
+  document.getElementById('aPatCount').textContent = patientsIndex.length;
+  if(!patientsIndex.length){
+    tbody.innerHTML='<tr class="empty"><td colspan="4">登録患者がいません</td></tr>';
+    return;
+  }
+  tbody.innerHTML = patientsIndex.map(p=>{
+    const bookingCount = Object.values(bookings).filter(b=>b.patientUid===p.uid && !b.blocked).length;
+    return `<tr>
+      <td style="font-weight:500">${(p.name||'—').replace(/</g,'&lt;')}</td>
+      <td style="color:var(--text-light);font-size:12px">${(p.pid||'—').replace(/</g,'&lt;')}</td>
+      <td style="font-size:12px;color:var(--text-mid)">${bookingCount > 0 ? `${bookingCount}件` : '—'}</td>
+      <td><button class="btn-sm" onclick="openPatDelModal('${p.uid}')">削除</button></td>
+    </tr>`;
+  }).join('');
+}
+function openPatDelModal(uid){
+  aPatDelUid = uid;
+  const p = patientsIndex.find(x=>x.uid===uid);
+  if(!p) return;
+  const bookingCount = Object.values(bookings).filter(b=>b.patientUid===uid && !b.blocked).length;
+  document.getElementById('aPatDelDetail').innerHTML =
+    `<div><strong>患者名：</strong>${(p.name||'—').replace(/</g,'&lt;')}</div>
+     <div><strong>部屋番号：</strong>${(p.pid||'—').replace(/</g,'&lt;')}</div>
+     <div><strong>予約件数：</strong>${bookingCount > 0 ? `${bookingCount}件（合わせて削除されます）` : 'なし'}</div>`;
+  document.getElementById('moPatDel').classList.add('show');
+}
+function closePatDelModal(){ document.getElementById('moPatDel').classList.remove('show'); aPatDelUid=null; }
+async function aDoDeletePatient(){
+  if(!aPatDelUid) return;
+  const uid = aPatDelUid;
+  const updates = {};
+  Object.entries(bookings).forEach(([key, b])=>{
+    if(b.patientUid===uid && !b.blocked) updates['bookings/'+key] = null;
+  });
+  updates['patients/'+uid] = null;
+  try {
+    await adminDb.ref().update(updates);
+    try {
+      const deleteAuth = adminFunctions.httpsCallable('deletePatientAuth');
+      await deleteAuth({ uid });
+    } catch(authErr) {
+      console.warn('Auth削除失敗:', authErr.message);
+    }
+    closePatDelModal();
+    showToast('患者アカウントを削除しました', 'tadm');
+  } catch(e) {
+    showToast('削除に失敗しました: ' + e.message, 'terr');
+  }
+}
+/* ======================================================
+   HELPERS
+====================================================== */
+function buildDR(obj){
+  return Object.entries(obj).map(([k,v])=>`<div style="display:flex;justify-content:space-between;font-size:13px;padding:6px 0;border-bottom:1px solid rgba(138,171,138,.1)"><span style="color:var(--text-light)">${k}</span><span style="color:var(--text-dark);font-weight:500">${v}</span></div>`).join('');
+}
+function showToast(msg, cls=''){
+  const t=document.getElementById('toast');
+  t.textContent=msg;
+  t.className='toast show'+(cls?' '+cls:'');
+  setTimeout(()=>{t.className='toast';},3000);
+}
+/* ======================================================
+   OVERLAY CLOSE ON BG CLICK
+====================================================== */
+['moAdd','moDel','moPatDel'].forEach(id=>{
+  document.getElementById(id).addEventListener('click',e=>{
+    if(e.target.id!==id) return;
+    if(id==='moAdd')    closeAddModal();
+    else if(id==='moDel')    closeDelModal();
+    else if(id==='moPatDel') closePatDelModal();
+  });
+});
+// 管理者認証モーダルは未ログイン時に背景クリックで閉じない
+document.getElementById('moAuth').addEventListener('click',e=>{
+  if(e.target.id==='moAuth' && adminLoggedIn) document.getElementById('moAuth').classList.remove('show');
+});
+/* ======================================================
+   KEYBOARD
+====================================================== */
+document.getElementById('authEmail').addEventListener('keydown',e=>{ if(e.key==='Enter') document.getElementById('authPw').focus(); document.getElementById('authErr').style.display='none'; });
+document.getElementById('authPw').addEventListener('keydown',e=>{ if(e.key==='Enter') doAuth(); document.getElementById('authErr').style.display='none'; });
+document.getElementById('aAddName').addEventListener('keydown',e=>{ if(e.key==='Enter') document.getElementById('aAddPid').focus(); document.getElementById('aAddName').classList.remove('err'); document.getElementById('aAddErr').style.display='none'; });
+document.getElementById('aAddPid').addEventListener('keydown',e=>{ if(e.key==='Enter') aDoAdd(); });
+/* ======================================================
+   INIT
+====================================================== */
+function init(){
+  if(firebaseConfig.apiKey === 'YOUR_API_KEY'){
+    document.getElementById('fbLoadingMsg').textContent = 'firebaseConfig を設定してください';
+    return;
+  }
+
+  // 管理者認証状態の監視
+  adminAuth.onAuthStateChanged(user => {
+    if(user){
+      adminLoggedIn = true;
+      document.getElementById('adminBadge').style.display = '';
+      document.getElementById('moAuth').classList.remove('show');
+      // データ読み込み済みなら即レンダリング
+      if(document.getElementById('fbLoading').style.display === 'none'){
+        renderCurrentAdminView();
+      }
+    } else {
+      adminLoggedIn = false;
+      document.getElementById('adminBadge').style.display = 'none';
+      // データ読み込み済みなら認証モーダルを表示
+      if(document.getElementById('fbLoading').style.display === 'none'){
+        openAuthModal();
+      }
+    }
+  });
+
+  // Firebase リアルタイムリスナー
+  let bookingsReady = false, roomReady = false;
+  function checkReady(){
+    if(!bookingsReady || !roomReady) return;
+    document.getElementById('fbLoading').style.display = 'none';
+    if(adminLoggedIn) renderAdminOverview();
+    else openAuthModal();
+  }
+
+  db.ref('bookings').on('value', snap => {
+    bookings = snap.val() || {};
+    if(!bookingsReady){ bookingsReady=true; checkReady(); }
+    else renderCurrentAdminView();
+  }, err => {
+    document.getElementById('fbLoadingMsg').textContent = '接続エラー: ' + err.message;
+  });
+
+  db.ref('roomUnavailable').on('value', snap => {
+    roomUnavailable = snap.val() || {};
+    if(!roomReady){ roomReady=true; checkReady(); }
+    else renderCurrentAdminView();
+  });
+
+  db.ref('patients').on('value', snap => {
+    const v = snap.val() || {};
+    const arr = Object.entries(v).map(([uid,p])=>({uid, name:(p?.name||'').trim(), pid:(p?.pid||'').trim()}))
+      .filter(x=>x.uid && x.name);
+    arr.sort((a,b)=> (a.pid||'').localeCompare(b.pid||'') || (a.name||'').localeCompare(b.name||''));
+    patientsIndex = arr;
+    if(document.getElementById('moAdd')) renderAddPatientSelect();
+    if(adminLoggedIn && currentAdminTab===4) renderAdminPatients();
+  });
+}
+init();
+</script>
+</body>
+</html>
